@@ -1,0 +1,27 @@
+
+> puzzleparty@0.1.0 build
+> next build
+
+   Ôû▓ Next.js 16.0.5 (Turbopack)
+
+   Creating an optimized production build ...
+
+> Build error occurred
+Error: Turbopack build failed with 1 errors:
+./src/app/layout.tsx:3:1
+Module not found: Can't resolve './globals.css'
+  1 | import type { Metadata } from "next";
+  2 | import { Inter } from "next/font/google";
+> 3 | import "./globals.css";
+    | ^^^^^^^^^^^^^^^^^^^^^^^
+  4 | import { Providers } from "./providers";
+  5 | import '@coinbase/onchainkit/styles.css';
+  6 |
+
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+    at <unknown> (./src/app/layout.tsx:3:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)

@@ -1,0 +1,22 @@
+
+> puzzleparty@0.1.0 build
+> next build
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+   Ôû▓ Next.js 16.0.5 (Turbopack)
+
+   Creating an optimized production build ...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+ Ô£ô Compiled successfully in 15.1s
+   Running TypeScript ...
+Failed to compile.
+
+./supabase/functions/on-mint-webhook/index.ts:1:23
+Type error: Cannot find module 'https://deno.land/std@0.168.0/http/server.ts' or its corresponding type declarations.
+
+> 1 | import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+    |                       ^
+  2 | import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+  3 | import { ethers } from "https://esm.sh/ethers@5.7.2";
+  4 |
+Next.js build worker exited with code: 1 and signal: null
