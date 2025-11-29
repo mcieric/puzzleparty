@@ -19,6 +19,9 @@ contract XPManager is ERC1155, Ownable {
     /// @notice Symbol of the collection
     string public symbol = "PPXP";
 
+    /// @notice Base URI for metadata
+    string internal _baseURI;
+
     /// @notice Authorized minters (e.g. backend wallet)
     mapping(address => bool) public minters;
 
@@ -52,8 +55,9 @@ contract XPManager is ERC1155, Ownable {
         emit MinterStatusUpdated(_minter, _status);
     }
 
-    function setURI(string calldata _uri) external onlyOwner {
-        _setURI(_uri);
+    function setURI(string calldata newURI) external onlyOwner {
+        _baseURI = newURI;
+        emit URI(newURI, 0); // 0 indicates default for all
     }
 
     /* =====================================================================================
@@ -67,29 +71,27 @@ contract XPManager is ERC1155, Ownable {
 
     function mintBatch(address _to, uint256[] calldata _ids, uint256[] calldata _amounts, bytes calldata _data) external {
         if (!minters[msg.sender] && msg.sender != owner()) revert NotAuthorized();
-        _mintBatch(_to, _ids, _amounts, _data);
+        _batchMint(_to, _ids, _amounts, _data);
     }
 
     /* =====================================================================================
                                         OVERRIDES
        ===================================================================================== */
 
-    function uri(uint256 id) public view override returns (string memory) {
-        // Implement logic to return specific URI per ID if needed, or default to base URI
-        return super.uri(id);
+    function uri(uint256) public view override returns (string memory) {
+        return _baseURI;
     }
 
     /// @dev Hook that is called before any token transfer.
     /// @dev Reverts if it's a transfer (not mint or burn).
     function _beforeTokenTransfer(
-        address operator,
         address from,
         address to,
         uint256[] memory ids,
         uint256[] memory amounts,
         bytes memory data
     ) internal virtual override {
-        super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
+        super._beforeTokenTransfer(from, to, ids, amounts, data);
 
         // Allow mints (from == 0) and burns (to == 0)
         // Disallow transfers between users

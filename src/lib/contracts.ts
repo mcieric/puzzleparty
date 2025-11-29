@@ -1,6 +1,6 @@
-export const PUZZLE_MANAGER_ADDRESS = '0x0000000000000000000000000000000000000000'; // Replace with deployed address
-export const XP_MANAGER_ADDRESS = '0x0000000000000000000000000000000000000000'; // Replace with deployed address
-export const USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'; // Base USDC
+export const PUZZLE_MANAGER_ADDRESS = '0x43ba12439d74256a109843c4d2a22cd0a88b6446'; // Deployed on Base Sepolia
+export const XP_MANAGER_ADDRESS = '0xbf3e285ec8eaac4645d5f7fa2bd420b2e9c2f6b5'; // Deployed on Base Sepolia
+export const USDC_ADDRESS = '0x036CbD53842c5426634e7929541eC2318f3dCF'; // Base Sepolia USDC
 
 export const PUZZLE_MANAGER_ABI = [
     {

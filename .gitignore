@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# foundry / solidity
+contracts/cache/
+contracts/out/
+contracts/broadcast/*/run-latest.json
+contracts/broadcast/*/run-*.json
+contracts/lib/
