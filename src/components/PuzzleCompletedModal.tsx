@@ -38,7 +38,6 @@ export function PuzzleCompletedModal({ isOpen, onClose, puzzleType = 'classic' }
         <AnimatePresence>
             {isOpen && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
-                    {/* Backdrop */}
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -46,8 +45,6 @@ export function PuzzleCompletedModal({ isOpen, onClose, puzzleType = 'classic' }
                         onClick={step === 'revealed' ? onClose : undefined}
                         className="absolute inset-0 bg-black/80 backdrop-blur-sm"
                     />
-
-                    {/* Content */}
                     <motion.div
                         initial={{ scale: 0, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
@@ -55,22 +52,18 @@ export function PuzzleCompletedModal({ isOpen, onClose, puzzleType = 'classic' }
                         transition={{ type: "spring", stiffness: 200, damping: 20 }}
                         className="relative z-10 max-w-md w-full"
                     >
-                        {/* Close button */}
                         {step === 'revealed' && (
                             <motion.button
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 onClick={onClose}
-                                className="absolute -top-4 -right-4 w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center hover:bg-slate-700 transition-colors border-2 border-white/20"
+                                className="absolute -top-4 -right-4 w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center hover:bg-slate-700 transition-colors border-2 border-white/20 z-10"
                             >
                                 <X className="w-5 h-5 text-white" />
                             </motion.button>
                         )}
-
-                        {/* Card */}
-                        <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-8 border-2 border-purple-500/30 shadow-2xl relative overflow-hidden">
-                            {/* Animated background sparkles */}
-                            <div className="absolute inset-0 overflow-hidden">
+                        <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-8 border-2 border-purple-500/30 shadow-2xl relative overflow-visible">
+                            <div className="absolute inset-0 overflow-hidden rounded-3xl">
                                 {[...Array(20)].map((_, i) => (
                                     <motion.div
                                         key={i}
@@ -92,48 +85,33 @@ export function PuzzleCompletedModal({ isOpen, onClose, puzzleType = 'classic' }
                                     </motion.div>
                                 ))}
                             </div>
-
-                            {/* Content */}
                             <div className="relative z-10 flex flex-col items-center gap-6">
-                                {/* Badge */}
-                                <motion.div
-                                    animate={step === 'celebrating' ? {
-                                        scale: [1, 1.2, 1],
-                                        rotate: [0, 10, -10, 0]
-                                    } : {}}
-                                    transition={{ duration: 0.5, repeat: step === 'celebrating' ? Infinity : 0 }}
-                                    className="relative"
-                                >
-                                    {/* Glow effect */}
-                                    <div className={`absolute inset-0 blur-3xl bg-gradient-to-r ${puzzleTypeColors[puzzleType]} opacity-50 animate-pulse`} />
-
-                                    {/* Badge image */}
-                                    <div className="relative w-32 h-32 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 p-1 shadow-2xl">
-                                        <div className="w-full h-full rounded-full bg-slate-900 flex items-center justify-center">
-                                            <Trophy className="w-16 h-16 text-yellow-400" />
+                                <div className="relative w-48 h-48 flex items-center justify-center">
+                                    <motion.div
+                                        animate={step === 'celebrating' ? {
+                                            scale: [1, 1.2, 1],
+                                            rotate: [0, 10, -10, 0]
+                                        } : {}}
+                                        transition={{ duration: 0.5, repeat: step === 'celebrating' ? Infinity : 0 }}
+                                        className="relative"
+                                    >
+                                        <div className={`absolute inset-0 blur-3xl bg-gradient-to-r ${puzzleTypeColors[puzzleType]} opacity-50 animate-pulse`} />
+                                        <div className="relative w-32 h-32 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 p-1 shadow-2xl">
+                                            <div className="w-full h-full rounded-full bg-slate-900 flex items-center justify-center">
+                                                <Trophy className="w-16 h-16 text-yellow-400" />
+                                            </div>
                                         </div>
-                                    </div>
-
-                                    {/* Stars around badge */}
-                                    {[...Array(8)].map((_, i) => (
-                                        <motion.div
-                                            key={i}
-                                            initial={{ scale: 0, opacity: 0 }}
-                                            animate={{ scale: 1, opacity: 1 }}
-                                            transition={{ delay: 0.5 + i * 0.1 }}
-                                            className="absolute"
-                                            style={{
-                                                top: `${50 + 50 * Math.cos((i * Math.PI * 2) / 8)}%`,
-                                                left: `${50 + 50 * Math.sin((i * Math.PI * 2) / 8)}%`,
-                                                transform: 'translate(-50%, -50%)'
-                                            }}
-                                        >
-                                            <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                                        </motion.div>
-                                    ))}
-                                </motion.div>
-
-                                {/* Title */}
+                                    </motion.div>
+                                    {/* Single star on top */}
+                                    <motion.div
+                                        initial={{ scale: 0, opacity: 0, rotate: -180 }}
+                                        animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                                        transition={{ delay: 0.5, type: "spring" }}
+                                        className="absolute -top-2 left-1/2 -translate-x-1/2"
+                                    >
+                                        <Star className="w-8 h-8 text-yellow-400 fill-yellow-400 drop-shadow-lg" />
+                                    </motion.div>
+                                </div>
                                 <motion.div
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
@@ -147,8 +125,6 @@ export function PuzzleCompletedModal({ isOpen, onClose, puzzleType = 'classic' }
                                         Congratulations! You've completed the puzzle! 🎉
                                     </p>
                                 </motion.div>
-
-                                {/* Stats */}
                                 <motion.div
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
@@ -164,8 +140,6 @@ export function PuzzleCompletedModal({ isOpen, onClose, puzzleType = 'classic' }
                                         <div className="text-xs text-gray-400">Badge Unlocked</div>
                                     </div>
                                 </motion.div>
-
-                                {/* Close button */}
                                 {step === 'revealed' && (
                                     <motion.button
                                         initial={{ opacity: 0, y: 20 }}

@@ -42,7 +42,7 @@ export function DebugPanel({
     };
 
     return (
-        <div className="fixed bottom-4 left-4 z-[200]">
+        <div className="fixed top-4 left-4 z-[200]">
             {/* Toggle Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
