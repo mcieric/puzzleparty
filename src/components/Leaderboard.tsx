@@ -6,45 +6,7 @@ import { Trophy, Medal, Crown, User } from 'lucide-react';
 import { LeaderboardEntry, Season } from '@/types';
 import { supabase } from '@/lib/supabase';
 
-// Mock data removed in favor of Supabase fetch
-const MOCK_SEASON: Season = {
-    id: 1,
-    name: 'Genesis Season',
-    start_date: '2025-01-01',
-    end_date: '2025-01-31',
-    is_active: true
-};
 
-const MOCK_LEADERBOARD: LeaderboardEntry[] = [
-    {
-        rank: 1,
-        user_id: '1',
-        wallet_address: '0x123...abc',
-        username: 'PuzzleKing',
-        xp: 15000,
-        avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=1'
-    },
-    {
-        rank: 2,
-        user_id: '2',
-        wallet_address: '0x456...def',
-        username: 'CryptoQueen',
-        xp: 12500,
-        avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=2'
-    },
-    {
-        rank: 3,
-        user_id: '3',
-        wallet_address: '0x789...ghi',
-        xp: 10000
-    },
-    {
-        rank: 4,
-        user_id: '4',
-        wallet_address: '0xabc...jkl',
-        xp: 8500
-    }
-];
 
 export function Leaderboard() {
     const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
@@ -53,15 +15,58 @@ export function Leaderboard() {
 
     useEffect(() => {
         const fetchData = async () => {
-            // In real app: fetch from 'season_xp' and 'seasons' tables
-            // const { data } = await supabase.from('season_xp')...
+            try {
+                // 1. Fetch active season
+                const { data: activeSeason, error: seasonError } = await supabase
+                    .from('seasons')
+                    .select('*')
+                    .eq('is_active', true)
+                    .single();
 
-            // Simulate API delay
-            setTimeout(() => {
-                setEntries(MOCK_LEADERBOARD);
-                setSeason(MOCK_SEASON);
+                if (seasonError && seasonError.code !== 'PGRST116') { // Ignore no rows found
+                    console.error('Error fetching season:', seasonError);
+                }
+
+                setSeason(activeSeason || null);
+
+                if (activeSeason) {
+                    // 2. Fetch leaderboard for the season
+                    // We need to join with users table to get username/wallet
+                    const { data: leaderboardData, error: leaderboardError } = await supabase
+                        .from('season_xp')
+                        .select(`
+                            xp_amount,
+                            users (
+                                id,
+                                wallet_address,
+                                xp
+                            )
+                        `)
+                        .eq('season_id', activeSeason.id)
+                        .order('xp_amount', { ascending: false })
+                        .limit(10);
+
+                    if (leaderboardError) throw leaderboardError;
+
+                    // Transform data to LeaderboardEntry
+                    const entries: LeaderboardEntry[] = leaderboardData.map((item: any, index: number) => ({
+                        rank: index + 1,
+                        user_id: item.users.id.toString(),
+                        wallet_address: item.users.wallet_address,
+                        username: undefined, // We don't have usernames in users table yet, maybe add later
+                        xp: item.xp_amount,
+                        avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${item.users.wallet_address}`
+                    }));
+
+                    setEntries(entries);
+                } else {
+                    setEntries([]);
+                }
+            } catch (error) {
+                console.error('Error fetching leaderboard:', error);
+            } finally {
                 setLoading(false);
-            }, 800);
+            }
         };
 
         fetchData();

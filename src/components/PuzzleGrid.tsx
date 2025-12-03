@@ -14,9 +14,10 @@ interface PuzzleGridProps {
     puzzleId: number;
     totalPieces: number;
     price: number;
+    userId?: number;
 }
 
-export function PuzzleGrid({ puzzleId, totalPieces, price }: PuzzleGridProps) {
+export function PuzzleGrid({ puzzleId, totalPieces, price, userId }: PuzzleGridProps) {
     const { address } = useAccount();
     const [mintedPieces, setMintedPieces] = useState<boolean[]>(new Array(totalPieces).fill(false));
     const [selectedPiece, setSelectedPiece] = useState<number | null>(null);
@@ -87,6 +88,38 @@ export function PuzzleGrid({ puzzleId, totalPieces, price }: PuzzleGridProps) {
         };
     }, [puzzleId, totalPieces]);
 
+    // Real-time subscription for Mystery Boxes
+    useEffect(() => {
+        if (!address || !userId) return;
+
+        const channel = supabase
+            .channel('mystery-box-channel')
+            .on(
+                'postgres_changes',
+                {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'mystery_boxes',
+                    filter: `user_id=eq.${userId}`,
+                },
+                (payload: any) => {
+                    const newBox = payload.new;
+                    setMysteryBoxType(newBox.box_type);
+                    // For now, we don't have reward details in the box record immediately if it's locked
+                    // But for the modal, we might want to show it. 
+                    // The webhook returns { success: true, mysteryBox: boolean }
+                    // The subscription gives us the box.
+                    // We can show the box immediately.
+                    setShowMysteryBox(true);
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, [address, userId]);
+
     const handleMint = async (pieceId: number) => {
         if (!address) {
             alert('Please connect your wallet first!');
@@ -101,21 +134,38 @@ export function PuzzleGrid({ puzzleId, totalPieces, price }: PuzzleGridProps) {
                 args: [BigInt(puzzleId), BigInt(pieceId)],
             });
             setSelectedPiece(pieceId);
-
-            // Simulate Mystery Box Drop (Demo Only - Real logic is in webhook)
-            // In production, we would listen to a Supabase subscription for 'mystery_boxes' insert
-            if (Math.random() > 0.7) { // 30% chance for demo
-                setTimeout(() => {
-                    setMysteryBoxType('Epic');
-                    setMysteryReward({ type: 'XP', amount: 500 });
-                    setShowMysteryBox(true);
-                }, 2000); // Show after mint transaction starts/completes
-            }
-
         } catch (err) {
             console.error(err);
         }
     };
+
+    // Watch for successful transaction to trigger webhook
+    useEffect(() => {
+        if (isConfirmed && hash && address) {
+            const triggerWebhook = async () => {
+                try {
+                    await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/on-mint-webhook`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`
+                        },
+                        body: JSON.stringify({
+                            record: {
+                                puzzleId,
+                                pieceId: selectedPiece, // We need to track which piece was minted
+                                minter: address,
+                                txHash: hash
+                            }
+                        })
+                    });
+                } catch (error) {
+                    console.error('Webhook trigger failed:', error);
+                }
+            };
+            triggerWebhook();
+        }
+    }, [isConfirmed, hash, address, puzzleId, selectedPiece]);
 
     return (
         <div className="flex flex-col items-center gap-8">
@@ -146,7 +196,8 @@ export function PuzzleGrid({ puzzleId, totalPieces, price }: PuzzleGridProps) {
                                     whileHover={{
                                         scale: isMinted ? 1 : 1.15,
                                         zIndex: 10,
-                                        rotate: isMinted ? 0 : [0, -5, 5, 0]
+                                        rotate: isMinted ? 0 : 5, // Simplified to avoid spring keyframe error
+                                        transition: { type: "spring", stiffness: 300 }
                                     }}
                                     whileTap={{ scale: 0.95 }}
                                     onClick={() => !isMinted && !isPending && handleMint(i)}
@@ -248,6 +299,37 @@ export function PuzzleGrid({ puzzleId, totalPieces, price }: PuzzleGridProps) {
                 boxType={mysteryBoxType}
                 reward={mysteryReward}
             />
+
+            {/* DEBUG: Test Controls */}
+            <div className="fixed bottom-4 right-4 flex gap-2 z-[200]">
+                <button
+                    onClick={() => {
+                        console.log('Test Box clicked!');
+                        setMysteryBoxType('Legendary');
+                        setMysteryReward({ type: 'XP', amount: 1000 });
+                        setShowMysteryBox(true);
+                        console.log('Mystery Box state set:', { showMysteryBox: true, mysteryBoxType: 'Legendary' });
+                    }}
+                    className="px-4 py-2 bg-red-500/20 text-red-300 text-xs rounded-lg border border-red-500/50 hover:bg-red-500/30 cursor-pointer"
+                >
+                    🐞 Test Box
+                </button>
+                <button
+                    onClick={() => {
+                        console.log('Sim Mint clicked!');
+                        // Simulate minting piece 0
+                        setMintedPieces(prev => {
+                            const newPieces = [...prev];
+                            newPieces[0] = true;
+                            return newPieces;
+                        });
+                        setSelectedPiece(0);
+                    }}
+                    className="px-4 py-2 bg-blue-500/20 text-blue-300 text-xs rounded-lg border border-blue-500/50 hover:bg-blue-500/30 cursor-pointer"
+                >
+                    🐞 Sim Mint
+                </button>
+            </div>
         </div>
     );
 }

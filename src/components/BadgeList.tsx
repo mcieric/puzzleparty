@@ -6,62 +6,44 @@ import { Badge, UserBadge } from '@/types';
 import { supabase } from '@/lib/supabase';
 import { motion } from 'framer-motion';
 
-// Mock data removed in favor of Supabase fetch
-const AVAILABLE_BADGES: Badge[] = [
-    {
-        id: 'first_mint',
-        name: 'First Mint',
-        description: 'Minted your first puzzle piece',
-        imageUrl: '/badges/first_mint.png',
-        tier: 'Bronze'
-    },
-    {
-        id: 'early_bird',
-        name: 'Early Bird',
-        description: 'Joined in the first week',
-        imageUrl: '/badges/early_bird.png',
-        tier: 'Silver'
-    },
-    {
-        id: 'puzzle_master',
-        name: 'Puzzle Master',
-        description: 'Completed a full puzzle',
-        imageUrl: '/badges/puzzle_master.png',
-        tier: 'Gold'
-    },
-    {
-        id: 'whale',
-        name: 'Whale',
-        description: 'Own 100+ pieces',
-        imageUrl: '/badges/whale.png',
-        tier: 'Diamond'
-    }
-];
-
 interface BadgeListProps {
     userId?: number; // Optional, if we want to view another user's badges
 }
 
 export function BadgeList({ userId }: BadgeListProps) {
     const [userBadges, setUserBadges] = useState<UserBadge[]>([]);
+    const [availableBadges, setAvailableBadges] = useState<Badge[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchBadges = async () => {
-            // In a real app, we would fetch from 'badges' table too.
-            // For now, we use mock AVAILABLE_BADGES and check 'user_badges' for unlocks.
+            try {
+                // 1. Fetch all available badges
+                const { data: allBadges, error: badgesError } = await supabase
+                    .from('badges')
+                    .select('*')
+                    .order('tier', { ascending: true }); // Simple ordering for now
 
-            // Mocking a fetch for demonstration if no userId provided (or current user)
-            // const { data } = await supabase.from('user_badges').select('*').eq('user_id', userId);
+                if (badgesError) throw badgesError;
+                setAvailableBadges(allBadges || []);
 
-            // SIMULATED DATA for demo purposes
-            setTimeout(() => {
-                setUserBadges([
-                    { badge_id: 'first_mint', earned_at: new Date().toISOString() },
-                    { badge_id: 'early_bird', earned_at: new Date(Date.now() - 86400000).toISOString() }
-                ]);
+                // 2. Fetch user's earned badges
+                if (userId) {
+                    const { data: earned, error: userBadgesError } = await supabase
+                        .from('user_badges')
+                        .select('*')
+                        .eq('user_id', userId);
+
+                    if (userBadgesError) throw userBadgesError;
+                    setUserBadges(earned || []);
+                } else {
+                    setUserBadges([]);
+                }
+            } catch (error) {
+                console.error('Error fetching badges:', error);
+            } finally {
                 setLoading(false);
-            }, 1000);
+            }
         };
 
         fetchBadges();
@@ -81,12 +63,12 @@ export function BadgeList({ userId }: BadgeListProps) {
                     <p className="text-gray-400 text-sm">Collect badges to prove your mastery.</p>
                 </div>
                 <div className="px-4 py-2 bg-slate-800/50 rounded-full border border-white/10 text-sm text-gray-300">
-                    {userBadges.length} / {AVAILABLE_BADGES.length} Unlocked
+                    {userBadges.length} / {availableBadges.length} Unlocked
                 </div>
             </motion.div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                {AVAILABLE_BADGES.map((badge) => {
+                {availableBadges.map((badge) => {
                     const userBadge = userBadges.find(ub => ub.badge_id === badge.id);
                     return (
                         <BadgeCard

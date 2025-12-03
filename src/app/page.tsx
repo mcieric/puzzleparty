@@ -195,7 +195,7 @@ export default function Home() {
 
                 {/* Puzzle Grid */}
                 <div className="flex justify-center">
-                    <PuzzleGrid puzzleId={puzzleId} totalPieces={totalPieces} price={price} />
+                    <PuzzleGrid puzzleId={puzzleId} totalPieces={totalPieces} price={price} userId={userId} />
                 </div>
 
                 {/* User Profile (Visible only when connected) */}
