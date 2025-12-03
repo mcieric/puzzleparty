@@ -22,6 +22,18 @@ contract XPManager is ERC1155, Ownable {
     /// @notice Base URI for metadata
     string internal _baseURI;
 
+    /// @notice Badge Tier Thresholds (XP required)
+    uint256 public constant BRONZE_THRESHOLD = 0;
+    uint256 public constant SILVER_THRESHOLD = 100;
+    uint256 public constant GOLD_THRESHOLD = 500;
+    uint256 public constant DIAMOND_THRESHOLD = 1500;
+
+    /// @notice Badge Token IDs
+    uint256 public constant BRONZE_BADGE = 1;
+    uint256 public constant SILVER_BADGE = 2;
+    uint256 public constant GOLD_BADGE = 3;
+    uint256 public constant DIAMOND_BADGE = 4;
+
     /// @notice Authorized minters (e.g. backend wallet)
     mapping(address => bool) public minters;
 
@@ -98,5 +110,19 @@ contract XPManager is ERC1155, Ownable {
         if (from != address(0) && to != address(0)) {
             revert Soulbound();
         }
+    }
+
+    /* =====================================================================================
+                                         HELPER FUNCTIONS
+       ===================================================================================== */
+
+    /// @notice Returns the badge tier for a given XP amount
+    /// @param _xpAmount The total XP amount
+    /// @return The badge token ID (1=Bronze, 2=Silver, 3=Gold, 4=Diamond)
+    function getBadgeTier(uint256 _xpAmount) public pure returns (uint256) {
+        if (_xpAmount >= DIAMOND_THRESHOLD) return DIAMOND_BADGE;
+        if (_xpAmount >= GOLD_THRESHOLD) return GOLD_BADGE;
+        if (_xpAmount >= SILVER_THRESHOLD) return SILVER_BADGE;
+        return BRONZE_BADGE;
     }
 }

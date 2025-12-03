@@ -34,8 +34,83 @@ export const PUZZLE_MANAGER_ABI = [
             { "name": "piecesMintedCount", "type": "uint256", "internalType": "uint256" },
             { "name": "isComplete", "type": "bool", "internalType": "bool" },
             { "name": "lastMinter", "type": "address", "internalType": "address" },
-            { "name": "solutionHash", "type": "bytes32", "internalType": "bytes32" }
+            { "name": "solutionHash", "type": "bytes32", "internalType": "bytes32" },
+            { "name": "prizePool", "type": "uint256", "internalType": "uint256" },
+            { "name": "raffleWinner", "type": "address", "internalType": "address" },
+            { "name": "raffleClaimed", "type": "bool", "internalType": "bool" },
+            { "name": "startTime", "type": "uint256", "internalType": "uint256" },
+            { "name": "completionTime", "type": "uint256", "internalType": "uint256" },
+            { "name": "puzzleType", "type": "uint8", "internalType": "enum PuzzleManager.PuzzleType" },
+            { "name": "lastGlobalMintTime", "type": "uint256", "internalType": "uint256" },
+            { "name": "sniperDuration", "type": "uint256", "internalType": "uint256" }
         ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "superPuzzleFund",
+        "inputs": [],
+        "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "userMintCount",
+        "inputs": [
+            { "name": "puzzleId", "type": "uint256", "internalType": "uint256" },
+            { "name": "user", "type": "address", "internalType": "address" }
+        ],
+        "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "lastUserMintTime",
+        "inputs": [
+            { "name": "puzzleId", "type": "uint256", "internalType": "uint256" },
+            { "name": "user", "type": "address", "internalType": "address" }
+        ],
+        "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "getPuzzleTimeRemaining",
+        "inputs": [{ "name": "puzzleId", "type": "uint256", "internalType": "uint256" }],
+        "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+        "stateMutability": "view"
+    },
+    {
+        "type": "event",
+        "name": "PieceMinted",
+        "inputs": [
+            { "name": "puzzleId", "type": "uint256", "indexed": true, "internalType": "uint256" },
+            { "name": "pieceId", "type": "uint256", "indexed": true, "internalType": "uint256" },
+            { "name": "minter", "type": "address", "indexed": true, "internalType": "address" }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "PuzzleCompleted",
+        "inputs": [
+            { "name": "puzzleId", "type": "uint256", "indexed": true, "internalType": "uint256" },
+            { "name": "lastMinter", "type": "address", "indexed": false, "internalType": "address" },
+            { "name": "winnerPrize", "type": "uint256", "indexed": false, "internalType": "uint256" }
+        ],
+        "anonymous": false
+    }
+] as const;
+
+export const XP_MANAGER_ABI = [
+    {
+        "type": "function",
+        "name": "balanceOf",
+        "inputs": [
+            { "name": "owner", "type": "address", "internalType": "address" },
+            { "name": "id", "type": "uint256", "internalType": "uint256" }
+        ],
+        "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
         "stateMutability": "view"
     }
 ] as const;

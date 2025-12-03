@@ -46,3 +46,10 @@ contracts/out/
 contracts/broadcast/*/run-latest.json
 contracts/broadcast/*/run-*.json
 contracts/lib/
+
+# logs and temp files
+*.log
+*.txt
+foundry.zip
+foundryup.ps1
+

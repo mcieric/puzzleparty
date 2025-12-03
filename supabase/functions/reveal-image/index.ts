@@ -5,7 +5,7 @@ const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
 const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-serve(async (req) => {
+serve(async (req: Request) => {
     try {
         const { puzzleId, pieceId } = await req.json();
 
@@ -36,7 +36,7 @@ serve(async (req) => {
         return new Response(JSON.stringify({ imageUrl: data.publicUrl }), {
             headers: { "Content-Type": "application/json" },
         });
-    } catch (error) {
+    } catch (error: any) {
         return new Response(JSON.stringify({ error: error.message }), {
             status: 500,
             headers: { "Content-Type": "application/json" },
