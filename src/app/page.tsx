@@ -273,15 +273,15 @@ export default function Home() {
             {(debugMintCooldown > 0 || debugPuzzleCooldown > 0) && (
                 <div className="fixed top-24 right-4 z-50 space-y-2">
                     {debugMintCooldown > 0 && (
-                        <div className="bg-red-500/20 backdrop-blur-xl border border-red-500/50 rounded-lg px-4 py-3 w-40">
-                            <div className="text-xs text-red-300 font-semibold text-center">Mint Cooldown</div>
-                            <div className="text-2xl font-bold text-white text-center tabular-nums">{debugMintCooldown}s</div>
+                        <div className="bg-red-500/20 backdrop-blur-xl border border-red-500/50 rounded-lg px-4 py-3 w-52">
+                            <div className="text-sm text-red-300 font-semibold text-center">Mint Cooldown</div>
+                            <div className="text-3xl font-bold text-white text-center tabular-nums">{debugMintCooldown}s</div>
                         </div>
                     )}
                     {debugPuzzleCooldown > 0 && (
-                        <div className="bg-orange-500/20 backdrop-blur-xl border border-orange-500/50 rounded-lg px-4 py-3 w-40">
-                            <div className="text-xs text-orange-300 font-semibold text-center">Puzzle Cooldown</div>
-                            <div className="text-lg font-bold text-white text-center tabular-nums">
+                        <div className="bg-orange-500/20 backdrop-blur-xl border border-orange-500/50 rounded-lg px-4 py-3 w-52">
+                            <div className="text-sm text-orange-300 font-semibold text-center">Puzzle Cooldown</div>
+                            <div className="text-3xl font-bold text-white text-center tabular-nums">
                                 {Math.floor(debugPuzzleCooldown / 3600)}h {Math.floor((debugPuzzleCooldown % 3600) / 60)}m {debugPuzzleCooldown % 60}s
                             </div>
                         </div>
