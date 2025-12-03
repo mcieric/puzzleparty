@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { PUZZLE_MANAGER_ABI, PUZZLE_MANAGER_ADDRESS, USDC_ADDRESS } from '@/lib/contracts';
@@ -121,14 +121,21 @@ export function PuzzleGrid({ puzzleId, totalPieces, price, userId, onSimMintRead
         };
     }, [address, userId]);
 
+    // Keep track of mintedPieces in a ref for the simMint closure
+    const mintedPiecesRef = useRef(mintedPieces);
+    useEffect(() => {
+        mintedPiecesRef.current = mintedPieces;
+    }, [mintedPieces]);
+
     // Expose simMint function
     useEffect(() => {
         if (onSimMintReady) {
             onSimMintReady(() => {
-                // Find a random unminted piece
-                const unmintedIndices = mintedPieces
-                    .map((minted, index) => (!minted ? index : -1))
-                    .filter((index) => index !== -1);
+                // Find a random unminted piece using the ref to get latest state
+                const currentMinted = mintedPiecesRef.current;
+                const unmintedIndices = currentMinted
+                    .map((minted: boolean, index: number) => (!minted ? index : -1))
+                    .filter((index: number) => index !== -1);
 
                 if (unmintedIndices.length > 0) {
                     const randomIndex = unmintedIndices[Math.floor(Math.random() * unmintedIndices.length)];
@@ -143,7 +150,7 @@ export function PuzzleGrid({ puzzleId, totalPieces, price, userId, onSimMintRead
                 }
             });
         }
-    }, [onSimMintReady, mintedPieces]);
+    }, [onSimMintReady]); // Removed mintedPieces dependency
 
     const handleMint = async (pieceId: number) => {
         if (!address) {

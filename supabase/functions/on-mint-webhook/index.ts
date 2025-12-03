@@ -147,6 +147,24 @@ serve(async (req: Request) => {
                 });
         }
 
+        // 8. Badge Checks
+        // Check for 'first_mint'
+        const { count: mintCount } = await supabase
+            .from("mints")
+            .select("*", { count: 'exact', head: true })
+            .eq("user_id", user.id);
+
+        if (mintCount === 1) {
+            // Unlock 'first_mint' badge
+            await supabase
+                .from("user_badges")
+                .upsert({
+                    user_id: user.id,
+                    badge_id: 'first_mint',
+                    earned_at: new Date().toISOString()
+                }, { onConflict: 'user_id, badge_id' });
+        }
+
         return new Response(JSON.stringify({ success: true, mysteryBox: isLucky }), {
             headers: { "Content-Type": "application/json" },
         });

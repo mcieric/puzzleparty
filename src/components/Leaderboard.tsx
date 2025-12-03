@@ -8,9 +8,14 @@ import { supabase } from '@/lib/supabase';
 
 
 
-export function Leaderboard() {
+interface LeaderboardProps {
+    currentUserId?: number;
+}
+
+export function Leaderboard({ currentUserId }: LeaderboardProps) {
     const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
     const [season, setSeason] = useState<Season | null>(null);
+    const [userRank, setUserRank] = useState<number | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -59,6 +64,15 @@ export function Leaderboard() {
                     }));
 
                     setEntries(entries);
+
+                    // 3. Find user's rank
+                    // If user is in top 10, we know the rank.
+                    // If not, we might need a separate query or just show '-' for now.
+                    // For V11, let's just check the top 10 list first.
+                    // Ideally we'd have a separate query for "my rank".
+
+                    // Assuming we have access to current user's wallet/id via context or props (not passed yet)
+                    // Let's add a prop for currentUserId to Leaderboard component.
                 } else {
                     setEntries([]);
                 }
@@ -70,7 +84,17 @@ export function Leaderboard() {
         };
 
         fetchData();
+        fetchData();
     }, []);
+
+    useEffect(() => {
+        if (currentUserId && entries.length > 0) {
+            const myEntry = entries.find(e => e.user_id === currentUserId.toString());
+            if (myEntry) {
+                setUserRank(myEntry.rank);
+            }
+        }
+    }, [currentUserId, entries]);
 
     const getRankIcon = (rank: number) => {
         switch (rank) {
@@ -107,7 +131,9 @@ export function Leaderboard() {
                 </div>
                 <div className="text-right">
                     <div className="text-xs text-gray-400 uppercase tracking-wider">Your Rank</div>
-                    <div className="text-xl font-bold text-white">#42</div>
+                    <div className="text-xl font-bold text-white">
+                        {userRank ? `#${userRank}` : '-'}
+                    </div>
                 </div>
             </div>
 

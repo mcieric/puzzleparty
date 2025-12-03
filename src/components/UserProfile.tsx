@@ -40,6 +40,8 @@ export function UserProfile({ additionalXP = 0 }: UserProfileProps) {
                 return;
             }
 
+            console.log('🔍 UserProfile: Fetching stats for', address);
+
             try {
                 // 1. Get User ID & Basic Stats
                 const { data: user, error: userError } = await supabase
@@ -48,7 +50,21 @@ export function UserProfile({ additionalXP = 0 }: UserProfileProps) {
                     .eq('wallet_address', address)
                     .single();
 
-                if (userError || !user) return;
+                if (userError || !user) {
+                    console.log('⚠️ UserProfile: User not found in DB, using defaults');
+                    // User doesn't exist yet, show default stats with debug XP
+                    setStats({
+                        xp: additionalXP,
+                        tier: 'Bronze',
+                        mints: 0,
+                        streak: 0,
+                        mystery_boxes_found: 0,
+                        next_tier_progress: getNextTierProgress(additionalXP)
+                    });
+                    return;
+                }
+
+                console.log('✅ UserProfile: User found', user);
 
                 // 2. Get Monthly Tier
                 const now = new Date();
@@ -73,24 +89,28 @@ export function UserProfile({ additionalXP = 0 }: UserProfileProps) {
                     .select('*', { count: 'exact', head: true })
                     .eq('user_id', user.id);
 
-                const currentMonthlyXp = (monthlyData?.xp_gained || 0) + additionalXP;
+                // Use total XP from users table + debug XP
+                const totalXp = (user.xp || 0) + additionalXP;
+
+                console.log('📊 UserProfile: Total XP =', totalXp, '(DB:', user.xp, '+ Debug:', additionalXP, ')');
 
                 setStats({
-                    xp: currentMonthlyXp, // Showing Monthly XP for progress bar context
+                    xp: totalXp,
                     tier: (monthlyData?.tier as any) || 'Bronze',
                     mints: mintsCount || 0,
                     streak: user.streak_days || 0,
                     mystery_boxes_found: boxesCount || 0,
-                    next_tier_progress: getNextTierProgress(currentMonthlyXp)
+                    next_tier_progress: getNextTierProgress(totalXp)
                 });
 
             } catch (error) {
-                console.error('Error fetching user profile:', error);
+                console.error('❌ UserProfile: Error fetching stats:', error);
             }
         };
 
         fetchStats();
     }, [isConnected, address, additionalXP]);
+
 
     if (!isConnected || !stats) return null;
 
@@ -125,7 +145,7 @@ export function UserProfile({ additionalXP = 0 }: UserProfileProps) {
                         {/* XP & Tier */}
                         <div className="col-span-2 bg-slate-800/50 rounded-2xl p-4 border border-white/5">
                             <div className="flex justify-between items-start mb-2">
-                                <span className="text-gray-400 text-sm">Current Season XP</span>
+                                <span className="text-gray-400 text-sm">Total XP</span>
                                 <Star className={`w-5 h-5 ${tierColors[stats.tier]}`} />
                             </div>
                             <div className="text-3xl font-bold text-white mb-2">
