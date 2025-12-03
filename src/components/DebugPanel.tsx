@@ -12,6 +12,7 @@ interface DebugPanelProps {
     onTestMysteryBox?: () => void;
     onSimMint?: () => void;
     onStartCooldown?: (type: 'mint' | 'puzzle') => void;
+    onTestPuzzleCompletion?: () => void;
 }
 
 export function DebugPanel({
@@ -21,7 +22,8 @@ export function DebugPanel({
     onUnlockBadge,
     onTestMysteryBox,
     onSimMint,
-    onStartCooldown
+    onStartCooldown,
+    onTestPuzzleCompletion
 }: DebugPanelProps) {
     const [isOpen, setIsOpen] = useState(true);
     const [activeSection, setActiveSection] = useState<string | null>('puzzles');
@@ -200,6 +202,12 @@ export function DebugPanel({
                                         className="px-3 py-2 bg-cyan-500/20 text-cyan-300 text-xs rounded border border-cyan-500/50 hover:bg-cyan-500/30"
                                     >
                                         Sim Mint
+                                    </button>
+                                    <button
+                                        onClick={onTestPuzzleCompletion}
+                                        className="px-3 py-2 bg-yellow-500/20 text-yellow-300 text-xs rounded border border-yellow-500/50 hover:bg-yellow-500/30 col-span-2"
+                                    >
+                                        🏆 Puzzle Completed
                                     </button>
                                 </div>
                             </DebugSection>

@@ -13,6 +13,7 @@ import { BadgeList } from '@/components/BadgeList';
 import { Leaderboard } from '@/components/Leaderboard';
 import { UserProfile } from '@/components/UserProfile';
 import { DebugPanel } from '@/components/DebugPanel';
+import { PuzzleCompletedModal } from '@/components/PuzzleCompletedModal';
 import { Sparkles, Trophy, Zap, Rocket } from 'lucide-react';
 import { useReadContract, useAccount } from 'wagmi';
 import { useState, useEffect } from 'react';
@@ -29,6 +30,7 @@ export default function Home() {
     const [debugMintCooldown, setDebugMintCooldown] = useState(0);
     const [debugPuzzleCooldown, setDebugPuzzleCooldown] = useState(0);
     const [showMysteryBox, setShowMysteryBox] = useState(false);
+    const [showPuzzleCompleted, setShowPuzzleCompleted] = useState(false);
 
     // Fetch Super Puzzle Fund
     const { data: superFund } = useReadContract({
@@ -318,6 +320,16 @@ export default function Home() {
                         setDebugPuzzleCooldown(24 * 60 * 60); // 24 hours in seconds
                     }
                 }}
+                onTestPuzzleCompletion={() => {
+                    setShowPuzzleCompleted(true);
+                }}
+            />
+
+            {/* Puzzle Completed Modal */}
+            <PuzzleCompletedModal
+                isOpen={showPuzzleCompleted}
+                onClose={() => setShowPuzzleCompleted(false)}
+                puzzleType={debugPuzzleType}
             />
         </main>
     );
