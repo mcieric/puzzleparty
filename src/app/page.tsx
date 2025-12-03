@@ -12,6 +12,7 @@ import { PuzzleGrid } from '@/components/PuzzleGrid';
 import { BadgeList } from '@/components/BadgeList';
 import { Leaderboard } from '@/components/Leaderboard';
 import { UserProfile } from '@/components/UserProfile';
+import { DebugPanel } from '@/components/DebugPanel';
 import { Sparkles, Trophy, Zap, Rocket } from 'lucide-react';
 import { useReadContract, useAccount } from 'wagmi';
 import { useState, useEffect } from 'react';
@@ -21,6 +22,13 @@ import { formatUnits } from 'viem';
 
 export default function Home() {
     const puzzleId = 1; // TODO: Make dynamic
+
+    // Debug State
+    const [debugPuzzleType, setDebugPuzzleType] = useState<'classic' | 'super' | 'mega'>('classic');
+    const [debugXP, setDebugXP] = useState(0);
+    const [debugMintCooldown, setDebugMintCooldown] = useState(0);
+    const [debugPuzzleCooldown, setDebugPuzzleCooldown] = useState(0);
+    const [showMysteryBox, setShowMysteryBox] = useState(false);
 
     // Fetch Super Puzzle Fund
     const { data: superFund } = useReadContract({
@@ -61,6 +69,25 @@ export default function Home() {
         };
         fetchUser();
     }, [address]);
+
+    // Cooldown timers
+    useEffect(() => {
+        if (debugMintCooldown > 0) {
+            const timer = setInterval(() => {
+                setDebugMintCooldown(prev => Math.max(0, prev - 1));
+            }, 1000);
+            return () => clearInterval(timer);
+        }
+    }, [debugMintCooldown]);
+
+    useEffect(() => {
+        if (debugPuzzleCooldown > 0) {
+            const timer = setInterval(() => {
+                setDebugPuzzleCooldown(prev => Math.max(0, prev - 1));
+            }, 1000);
+            return () => clearInterval(timer);
+        }
+    }, [debugPuzzleCooldown]);
 
     return (
         <main className="relative min-h-screen">
@@ -241,6 +268,57 @@ export default function Home() {
                     <Leaderboard />
                 </div>
             </div>
+
+            {/* Cooldown Indicators */}
+            {(debugMintCooldown > 0 || debugPuzzleCooldown > 0) && (
+                <div className="fixed top-24 right-4 z-50 space-y-2">
+                    {debugMintCooldown > 0 && (
+                        <div className="bg-red-500/20 backdrop-blur-xl border border-red-500/50 rounded-lg px-4 py-3 w-40">
+                            <div className="text-xs text-red-300 font-semibold text-center">Mint Cooldown</div>
+                            <div className="text-2xl font-bold text-white text-center tabular-nums">{debugMintCooldown}s</div>
+                        </div>
+                    )}
+                    {debugPuzzleCooldown > 0 && (
+                        <div className="bg-orange-500/20 backdrop-blur-xl border border-orange-500/50 rounded-lg px-4 py-3 w-40">
+                            <div className="text-xs text-orange-300 font-semibold text-center">Puzzle Cooldown</div>
+                            <div className="text-lg font-bold text-white text-center tabular-nums">
+                                {Math.floor(debugPuzzleCooldown / 3600)}h {Math.floor((debugPuzzleCooldown % 3600) / 60)}m {debugPuzzleCooldown % 60}s
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Debug Panel */}
+            <DebugPanel
+                onPuzzleTypeChange={(type) => {
+                    setDebugPuzzleType(type);
+                    console.log('Puzzle type changed to:', type);
+                }}
+                onAddXP={(amount) => {
+                    setDebugXP(prev => prev + amount);
+                    console.log('Added XP:', amount, 'Total:', debugXP + amount);
+                }}
+                onPopulateLeaderboard={() => {
+                    console.log('Populating leaderboard...');
+                }}
+                onUnlockBadge={(badgeId) => {
+                    console.log('Unlocking badge:', badgeId);
+                }}
+                onTestMysteryBox={() => {
+                    setShowMysteryBox(true);
+                }}
+                onSimMint={() => {
+                    console.log('Simulating mint...');
+                }}
+                onStartCooldown={(type) => {
+                    if (type === 'mint') {
+                        setDebugMintCooldown(45);
+                    } else {
+                        setDebugPuzzleCooldown(24 * 60 * 60); // 24 hours in seconds
+                    }
+                }}
+            />
         </main>
     );
 }

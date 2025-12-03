@@ -299,37 +299,6 @@ export function PuzzleGrid({ puzzleId, totalPieces, price, userId }: PuzzleGridP
                 boxType={mysteryBoxType}
                 reward={mysteryReward}
             />
-
-            {/* DEBUG: Test Controls */}
-            <div className="fixed bottom-4 right-4 flex gap-2 z-[200]">
-                <button
-                    onClick={() => {
-                        console.log('Test Box clicked!');
-                        setMysteryBoxType('Legendary');
-                        setMysteryReward({ type: 'XP', amount: 1000 });
-                        setShowMysteryBox(true);
-                        console.log('Mystery Box state set:', { showMysteryBox: true, mysteryBoxType: 'Legendary' });
-                    }}
-                    className="px-4 py-2 bg-red-500/20 text-red-300 text-xs rounded-lg border border-red-500/50 hover:bg-red-500/30 cursor-pointer"
-                >
-                    🐞 Test Box
-                </button>
-                <button
-                    onClick={() => {
-                        console.log('Sim Mint clicked!');
-                        // Simulate minting piece 0
-                        setMintedPieces(prev => {
-                            const newPieces = [...prev];
-                            newPieces[0] = true;
-                            return newPieces;
-                        });
-                        setSelectedPiece(0);
-                    }}
-                    className="px-4 py-2 bg-blue-500/20 text-blue-300 text-xs rounded-lg border border-blue-500/50 hover:bg-blue-500/30 cursor-pointer"
-                >
-                    🐞 Sim Mint
-                </button>
-            </div>
         </div>
     );
 }

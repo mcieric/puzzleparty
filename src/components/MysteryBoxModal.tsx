@@ -60,43 +60,47 @@ export function MysteryBoxModal({ isOpen, onClose, boxType, reward }: MysteryBox
                         {/* The Box */}
                         <div className="relative cursor-pointer" onClick={handleOpen}>
                             {/* Glow behind box */}
-                            <motion.div
-                                animate={{
-                                    scale: step === 'opening' ? 2 : [1, 1.2, 1],
-                                    opacity: step === 'opening' ? 0 : 0.5
-                                }}
-                                transition={{ duration: 2, repeat: Infinity }}
-                                className={`absolute inset-0 blur-3xl bg-gradient-to-r ${boxColors[boxType]} rounded-full`}
-                            />
+                            {step !== 'revealed' && (
+                                <motion.div
+                                    animate={{
+                                        scale: step === 'opening' ? 2 : [1, 1.2, 1],
+                                        opacity: step === 'opening' ? 0 : 0.5
+                                    }}
+                                    transition={{ duration: 2, repeat: Infinity }}
+                                    className={`absolute inset-0 blur-3xl bg-gradient-to-r ${boxColors[boxType]} rounded-full`}
+                                />
+                            )}
 
-                            <motion.div
-                                animate={
-                                    step === 'shaking' ? {
-                                        x: [-5, 5, -5, 5, 0],
-                                        rotate: [-5, 5, -5, 5, 0]
-                                    } : step === 'opening' ? {
-                                        scale: 1.5,
-                                        opacity: 0
-                                    } : {}
-                                }
-                                transition={{ duration: 0.5 }}
-                                className={`
-                                    relative w-48 h-48 rounded-3xl bg-gradient-to-br ${boxColors[boxType]}
-                                    shadow-2xl flex items-center justify-center border-4 border-white/20
-                                `}
-                            >
-                                <Gift className="w-24 h-24 text-white drop-shadow-lg" />
+                            {step !== 'revealed' && (
+                                <motion.div
+                                    animate={
+                                        step === 'shaking' ? {
+                                            x: [-5, 5, -5, 5, 0],
+                                            rotate: [-5, 5, -5, 5, 0]
+                                        } : step === 'opening' ? {
+                                            scale: 1.5,
+                                            opacity: 0
+                                        } : {}
+                                    }
+                                    transition={{ duration: 0.5 }}
+                                    className={`
+                                        relative w-48 h-48 rounded-3xl bg-gradient-to-br ${boxColors[boxType]}
+                                        shadow-2xl flex items-center justify-center border-4 border-white/20
+                                    `}
+                                >
+                                    <Gift className="w-24 h-24 text-white drop-shadow-lg" />
 
-                                {step === 'closed' && (
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        className="absolute -bottom-12 text-white font-bold text-lg animate-bounce"
-                                    >
-                                        Tap to Open!
-                                    </motion.div>
-                                )}
-                            </motion.div>
+                                    {step === 'closed' && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            className="absolute -bottom-12 text-white font-bold text-lg animate-bounce"
+                                        >
+                                            Tap to Open!
+                                        </motion.div>
+                                    )}
+                                </motion.div>
+                            )}
                         </div>
 
                         {/* Reward Reveal */}
