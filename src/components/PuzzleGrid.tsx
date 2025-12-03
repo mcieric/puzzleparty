@@ -15,9 +15,10 @@ interface PuzzleGridProps {
     totalPieces: number;
     price: number;
     userId?: number;
+    onSimMintReady?: (simMintFn: () => void) => void;
 }
 
-export function PuzzleGrid({ puzzleId, totalPieces, price, userId }: PuzzleGridProps) {
+export function PuzzleGrid({ puzzleId, totalPieces, price, userId, onSimMintReady }: PuzzleGridProps) {
     const { address } = useAccount();
     const [mintedPieces, setMintedPieces] = useState<boolean[]>(new Array(totalPieces).fill(false));
     const [selectedPiece, setSelectedPiece] = useState<number | null>(null);
@@ -119,6 +120,30 @@ export function PuzzleGrid({ puzzleId, totalPieces, price, userId }: PuzzleGridP
             supabase.removeChannel(channel);
         };
     }, [address, userId]);
+
+    // Expose simMint function
+    useEffect(() => {
+        if (onSimMintReady) {
+            onSimMintReady(() => {
+                // Find a random unminted piece
+                const unmintedIndices = mintedPieces
+                    .map((minted, index) => (!minted ? index : -1))
+                    .filter((index) => index !== -1);
+
+                if (unmintedIndices.length > 0) {
+                    const randomIndex = unmintedIndices[Math.floor(Math.random() * unmintedIndices.length)];
+                    setMintedPieces((prev) => {
+                        const next = [...prev];
+                        next[randomIndex] = true;
+                        return next;
+                    });
+                    console.log(`Simulated mint for piece ${randomIndex}`);
+                } else {
+                    console.log('All pieces already minted!');
+                }
+            });
+        }
+    }, [onSimMintReady, mintedPieces]);
 
     const handleMint = async (pieceId: number) => {
         if (!address) {

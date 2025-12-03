@@ -14,14 +14,16 @@ import { Leaderboard } from '@/components/Leaderboard';
 import { UserProfile } from '@/components/UserProfile';
 import { DebugPanel } from '@/components/DebugPanel';
 import { PuzzleCompletedModal } from '@/components/PuzzleCompletedModal';
+import { MysteryBoxModal } from '@/components/MysteryBoxModal';
 import { Sparkles, Trophy, Zap, Rocket } from 'lucide-react';
 import { useReadContract, useAccount } from 'wagmi';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { PUZZLE_MANAGER_ABI, PUZZLE_MANAGER_ADDRESS } from '@/lib/contracts';
 import { formatUnits } from 'viem';
 
 export default function Home() {
+    const simMintRef = useRef<(() => void) | null>(null);
     const puzzleId = 1; // TODO: Make dynamic
 
     // Debug State
@@ -224,12 +226,20 @@ export default function Home() {
 
                 {/* Puzzle Grid */}
                 <div className="flex justify-center">
-                    <PuzzleGrid puzzleId={puzzleId} totalPieces={totalPieces} price={price} userId={userId} />
+                    <PuzzleGrid
+                        puzzleId={puzzleId}
+                        totalPieces={totalPieces}
+                        price={price}
+                        userId={userId}
+                        onSimMintReady={(fn) => {
+                            simMintRef.current = fn;
+                        }}
+                    />
                 </div>
 
                 {/* User Profile (Visible only when connected) */}
                 <div className="mt-12">
-                    <UserProfile />
+                    <UserProfile additionalXP={debugXP} />
                 </div>
 
                 {/* How to Play */}
@@ -312,6 +322,11 @@ export default function Home() {
                 }}
                 onSimMint={() => {
                     console.log('Simulating mint...');
+                    if (simMintRef.current) {
+                        simMintRef.current();
+                    } else {
+                        console.warn('Sim Mint function not ready yet');
+                    }
                 }}
                 onStartCooldown={(type) => {
                     if (type === 'mint') {
@@ -323,6 +338,14 @@ export default function Home() {
                 onTestPuzzleCompletion={() => {
                     setShowPuzzleCompleted(true);
                 }}
+            />
+
+            {/* Mystery Box Modal */}
+            <MysteryBoxModal
+                isOpen={showMysteryBox}
+                onClose={() => setShowMysteryBox(false)}
+                boxType="Legendary"
+                reward={{ type: 'XP', amount: 100 }}
             />
 
             {/* Puzzle Completed Modal */}

@@ -25,7 +25,11 @@ const tierColors = {
     Diamond: 'text-cyan-400',
 };
 
-export function UserProfile() {
+interface UserProfileProps {
+    additionalXP?: number;
+}
+
+export function UserProfile({ additionalXP = 0 }: UserProfileProps) {
     const { address, isConnected } = useAccount();
     const [stats, setStats] = useState<UserStats | null>(null);
 
@@ -69,7 +73,7 @@ export function UserProfile() {
                     .select('*', { count: 'exact', head: true })
                     .eq('user_id', user.id);
 
-                const currentMonthlyXp = monthlyData?.xp_gained || 0;
+                const currentMonthlyXp = (monthlyData?.xp_gained || 0) + additionalXP;
 
                 setStats({
                     xp: currentMonthlyXp, // Showing Monthly XP for progress bar context
@@ -86,7 +90,7 @@ export function UserProfile() {
         };
 
         fetchStats();
-    }, [isConnected, address]);
+    }, [isConnected, address, additionalXP]);
 
     if (!isConnected || !stats) return null;
 
